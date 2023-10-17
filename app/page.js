@@ -55,7 +55,9 @@ export default function Home() {
   }
 
   const pull_handler = async () => {
-    const pull_origin = objectify(await sheets.pull_data("reviews-pull"))
+    const pull_origin = objectify(
+      await sheets.pull_data(`reviews-pull-${lob.toLowerCase()}`)
+    )
     const updated = objectify(
       await sheets.pull_data("reviews-updated")
     ).reverse()
