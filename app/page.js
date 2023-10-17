@@ -11,7 +11,7 @@ import AreaInput from "./AreaInput"
 import { objectify } from "./lib/utils"
 import { faCheck } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import ReviewerList from "./ReviewerSelector"
+import ReviewerList from "./ReviewerList"
 import { useSearchParams } from "next/navigation"
 import BoxGrid from "./BoxGrid"
 
