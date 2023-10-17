@@ -1,3 +1,5 @@
+import { uniqueId } from "lodash"
+
 const ReviewerList = ({ label, filter_handler, field, data }) => {
   return (
     <>
@@ -12,7 +14,7 @@ const ReviewerList = ({ label, filter_handler, field, data }) => {
             {["All Reviewers", ...new Set(data.map((record) => record[field]))]
               .filter((r) => r)
               .map((r) => (
-                <option>{r}</option>
+                <option key={uniqueId()}>{r}</option>
               ))}
           </select>
         </div>

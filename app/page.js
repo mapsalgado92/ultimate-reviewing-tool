@@ -14,6 +14,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import ReviewerList from "./ReviewerList"
 import { useSearchParams } from "next/navigation"
 import BoxGrid from "./BoxGrid"
+import { uniqueId } from "lodash"
 
 export default function Home() {
   const [state, dispatch] = useReducer(reducer, initialState)
@@ -69,10 +70,6 @@ export default function Home() {
     })
 
     dispatch({ type: "pull", payload: { data: merged } })
-  }
-
-  const push_data = (entry) => {
-    sheets.push_data("reviews-updated", [entry])
   }
 
   return (
@@ -138,6 +135,7 @@ export default function Home() {
                         : "is-outlined"
                     } `}
                     onClick={() => select_handler(record.ticket_id)}
+                    key={uniqueId()}
                   >
                     {record.ticket_id}
                     <span className="ml-1">
