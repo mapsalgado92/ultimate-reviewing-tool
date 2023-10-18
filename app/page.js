@@ -15,6 +15,7 @@ import ReviewerList from "./ReviewerList"
 import { useSearchParams } from "next/navigation"
 import BoxGrid from "./BoxGrid"
 import { uniqueId } from "lodash"
+import ReviewSelector from "./ReviewSelector"
 
 export default function Home() {
   const [state, dispatch] = useReducer(reducer, initialState)
@@ -112,47 +113,14 @@ export default function Home() {
             />
           )}
           <br></br>
-          <ul>
-            {state.updated.data &&
-              state.updated.data
-                .filter((r) => {
-                  let reviewer_filter = state.filter.reviewer
-                    ? state.filter.reviewer === r.reviewer
-                    : true
-                  let quality_filter = state.filter.quality_reviewer
-                    ? state.filter.quality_reviewer === r.quality_reviewer
-                    : true
-                  return reviewer_filter && quality_filter
-                })
-                .sort((a, b) => (a.rated_date > b.rated_date ? 1 : -1))
-                .map((record) => (
-                  <li
-                    className={`button is-fullwidth is-small  ${
-                      record.reviewed ? "is-success" : "is-danger"
-                    } ${
-                      state.selected
-                        ? record.ticket_id !== state.selected.ticket_id
-                          ? "is-outlined"
-                          : ""
-                        : "is-outlined"
-                    } `}
-                    onClick={() => select_handler(record.ticket_id)}
-                    key={uniqueId()}
-                  >
-                    {record.ticket_id}
-                    <span className="ml-1">
-                      {record.reviewed === "Reviewed" && (
-                        <FontAwesomeIcon icon={faCheck} />
-                      )}
-                    </span>
-                    <span>
-                      {record.quality_reviewed === "Reviewed" && (
-                        <FontAwesomeIcon icon={faCheck} />
-                      )}
-                    </span>
-                  </li>
-                ))}
-          </ul>
+          {state.updated.data && (
+            <ReviewSelector
+              data={state.updated.data}
+              filter={state.filter}
+              selected={state.selected}
+              select_handler={select_handler}
+            />
+          )}
         </div>
         {state.selected && (
           <div
@@ -948,9 +916,10 @@ const bottom_columns = [
   { name: "last_assigned_agent_lm_id", label: "Last Assigned LM ID" },
   { name: "is_accurately_routed", label: "Is Accurately Routed" },
   { name: "queue_name", label: "Queue Name" },
-  { name: "reviewer", label: "Allocated POM" },
-  { name: "feedback", label: "Feedback" },
+  { name: "reviewer", label: "Reviewer" },
+  { name: "quality_reviewer", label: "Quality Reviewer" },
   { name: "last_specialised_queue", label: "Last Specialised Queue" },
+  { name: "feedback", label: "Feedback" },
 ]
 
 const top_columns = [
