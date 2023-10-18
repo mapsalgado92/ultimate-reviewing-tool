@@ -9,12 +9,9 @@ import TextInput from "./TextInput"
 import ToggleIput from "./ToggleInput"
 import AreaInput from "./AreaInput"
 import { objectify } from "./lib/utils"
-import { faCheck } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import ReviewerList from "./ReviewerList"
 import { useSearchParams } from "next/navigation"
 import BoxGrid from "./BoxGrid"
-import { uniqueId } from "lodash"
 import ReviewSelector from "./ReviewSelector"
 
 export default function Home() {
@@ -63,6 +60,9 @@ export default function Home() {
       await sheets.pull_data("reviews-updated")
     ).reverse()
 
+    const rca = (await sheets.pull_rca(`rca-${lob.toLowerCase()}-json`))[0]
+
+    console.log(rca[0])
     const merged = pull_origin.map((o) => {
       let match = updated.find((u) => o.ticket_id === u.ticket_id)
       if (match) {
@@ -72,7 +72,10 @@ export default function Home() {
       }
     })
 
-    dispatch({ type: "pull", payload: { data: merged } })
+    dispatch({
+      type: "pull",
+      payload: { data: merged, rca: JSON.parse(rca) },
+    })
   }
 
   return (
@@ -139,22 +142,29 @@ export default function Home() {
             <form name="form box">
               <div className="columns">
                 <div className="column is-4 ">
-                  <RCAFormBlock form={form} rca={rca} label={"Main RCA"} />
-                </div>
-                <div className="column is-4">
                   <RCAFormBlock
                     form={form}
-                    rca={rca}
-                    label={"Secondary RCA"}
-                    level="sec"
+                    rca={state.rca}
+                    label={"Main RCA"}
+                    vertical={state.selected.cx_vertical}
                   />
                 </div>
                 <div className="column is-4">
                   <RCAFormBlock
                     form={form}
-                    rca={rca}
+                    rca={state.rca}
+                    label={"Secondary RCA"}
+                    level="sec"
+                    vertical={state.selected.cx_vertical}
+                  />
+                </div>
+                <div className="column is-4">
+                  <RCAFormBlock
+                    form={form}
+                    rca={state.rca}
                     label={"Tertiary RCA"}
                     level="ter"
+                    vertical={state.selected.cx_vertical}
                   />
                 </div>
               </div>
@@ -257,6 +267,7 @@ const reducer = (state, action) => {
           data: structuredClone(action.payload.data),
         },
         selected: null,
+        rca: structuredClone(action.payload.rca),
         filter: {
           reviewer: null,
           quality_reviewer: null,
@@ -301,160 +312,8 @@ const reducer = (state, action) => {
   }
 }
 
-const initialState = {
-  upload: {
-    is_uploaded: false,
-    data: null,
-  },
-  updated: {
-    has_changed: false,
-    data: null,
-  },
-  selected: null,
-  filter: {
-    reviewer: null,
-    quality_reviewer: null,
-  },
-}
-
-//----------------------------------------------------------- Form Fields
-const form_fields = [
-  {
-    name: "rca1",
-    label: "RCA 1",
-    default: "",
-    required: true,
-  },
-  {
-    name: "rca2",
-    label: "RCA 2",
-    default: "",
-    required: true,
-  },
-  {
-    name: "rca3",
-    label: "RCA 3",
-    default: "",
-    required: true,
-  },
-  {
-    name: "rca1",
-    label: "RCA 1",
-    default: "",
-    required: true,
-  },
-  {
-    name: "rca2",
-    label: "RCA 2",
-    default: "",
-    required: true,
-  },
-  {
-    name: "rca3",
-    label: "RCA 3",
-    default: "",
-    required: true,
-  },
-  {
-    name: "sec_rca1",
-    label: "Secondary RCA 1",
-    default: "",
-    required: true,
-  },
-  {
-    name: "sec_rca2",
-    label: "Secondary RCA 2",
-    default: "",
-    required: true,
-  },
-  {
-    name: "sec_rca3",
-    label: "Secondary RCA 3",
-    default: "",
-    required: true,
-  },
-  {
-    name: "ter_rca1",
-    label: "Tertiary RCA 1",
-    default: "",
-    required: true,
-  },
-  {
-    name: "ter_rca2",
-    label: "Tertiary RCA 2",
-    default: "",
-    required: true,
-  },
-  {
-    name: "ter_rca3",
-    label: "Tertiary RCA 3",
-    default: "",
-    required: true,
-  },
-  {
-    name: "agent_for_feedback",
-    label: "Agent for Feedback",
-    default: "",
-    required: false,
-    type: "email",
-  },
-  {
-    name: "feedback_needed",
-    label: "Feedback Needed",
-    default: "",
-    required: false,
-    type: "string",
-  },
-  {
-    name: "feedback_delivered",
-    label: "Feedback Delivered",
-    default: "",
-    required: false,
-    type: "string",
-  },
-  {
-    name: "lm_agent_for_feedback",
-    label: "Line Manager (Agent for Feedback)",
-    default: "",
-    required: false,
-    type: "email",
-  },
-  {
-    name: "reviewer_comment",
-    label: "Reviewer Comment",
-    default: "",
-    required: false,
-    type: "textarea",
-  },
-  {
-    name: "quality_check",
-    label: "Quality Check Comment",
-    default: "",
-    required: false,
-    type: "textarea",
-  },
-  {
-    name: "reviewed",
-    label: "Is Reviewed?",
-    default: "Not Reviewed",
-    required: false,
-  },
-  {
-    name: "quality_reviewed",
-    label: "Is Quality Reviewed?",
-    default: "Not Reviewed",
-    required: false,
-  },
-  {
-    name: "updated",
-    label: "Was updated on this session?",
-    default: false,
-    required: true,
-  },
-]
-
 //---------------------------------------------------------- RCA Structure
-const rca = {
+const rca_template = {
   rca3: {
     "2nd Line/Fincrime Limitation": {
       "": [
@@ -903,6 +762,159 @@ const rca = {
     "No Issue Found",
   ],
 }
+
+const initialState = {
+  upload: {
+    is_uploaded: false,
+    data: null,
+  },
+  updated: {
+    has_changed: false,
+    data: null,
+  },
+  selected: null,
+  rca: rca_template,
+  filter: {
+    reviewer: null,
+    quality_reviewer: null,
+  },
+}
+
+//----------------------------------------------------------- Form Fields
+const form_fields = [
+  {
+    name: "rca1",
+    label: "RCA 1",
+    default: "",
+    required: true,
+  },
+  {
+    name: "rca2",
+    label: "RCA 2",
+    default: "",
+    required: true,
+  },
+  {
+    name: "rca3",
+    label: "RCA 3",
+    default: "",
+    required: true,
+  },
+  {
+    name: "rca1",
+    label: "RCA 1",
+    default: "",
+    required: true,
+  },
+  {
+    name: "rca2",
+    label: "RCA 2",
+    default: "",
+    required: true,
+  },
+  {
+    name: "rca3",
+    label: "RCA 3",
+    default: "",
+    required: true,
+  },
+  {
+    name: "sec_rca1",
+    label: "Secondary RCA 1",
+    default: "",
+    required: true,
+  },
+  {
+    name: "sec_rca2",
+    label: "Secondary RCA 2",
+    default: "",
+    required: true,
+  },
+  {
+    name: "sec_rca3",
+    label: "Secondary RCA 3",
+    default: "",
+    required: true,
+  },
+  {
+    name: "ter_rca1",
+    label: "Tertiary RCA 1",
+    default: "",
+    required: true,
+  },
+  {
+    name: "ter_rca2",
+    label: "Tertiary RCA 2",
+    default: "",
+    required: true,
+  },
+  {
+    name: "ter_rca3",
+    label: "Tertiary RCA 3",
+    default: "",
+    required: true,
+  },
+  {
+    name: "agent_for_feedback",
+    label: "Agent for Feedback",
+    default: "",
+    required: false,
+    type: "email",
+  },
+  {
+    name: "feedback_needed",
+    label: "Feedback Needed",
+    default: "",
+    required: false,
+    type: "string",
+  },
+  {
+    name: "feedback_delivered",
+    label: "Feedback Delivered",
+    default: "",
+    required: false,
+    type: "string",
+  },
+  {
+    name: "lm_agent_for_feedback",
+    label: "Line Manager (Agent for Feedback)",
+    default: "",
+    required: false,
+    type: "email",
+  },
+  {
+    name: "reviewer_comment",
+    label: "Reviewer Comment",
+    default: "",
+    required: false,
+    type: "textarea",
+  },
+  {
+    name: "quality_check",
+    label: "Quality Check Comment",
+    default: "",
+    required: false,
+    type: "textarea",
+  },
+  {
+    name: "reviewed",
+    label: "Is Reviewed?",
+    default: "Not Reviewed",
+    required: false,
+  },
+  {
+    name: "quality_reviewed",
+    label: "Is Quality Reviewed?",
+    default: "Not Reviewed",
+    required: false,
+  },
+  {
+    name: "updated",
+    label: "Was updated on this session?",
+    default: false,
+    required: true,
+  },
+]
 
 //---------------------------------------------------------- Selected Columns
 const bottom_columns = [

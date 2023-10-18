@@ -15,6 +15,10 @@ const FormDropdown = ({
     !form.checkIsReset() && setSelected(form.get(fieldName))
   }, [form, fieldName, curr_val])
 
+  useEffect(() => {
+    console.log("OPTIONS:", options)
+  }, [options])
+
   return (
     <div
       className={`select is-fullwidth is-small ${

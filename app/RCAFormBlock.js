@@ -3,7 +3,7 @@ import FormDropdown from "@/components/forms/FormDropdown"
 //rca: Object
 //level: null or 'sec' or 'ter'
 
-const RCAFormBlock = ({ form, rca, label, level }) => {
+const RCAFormBlock = ({ form, rca, label, level, vertical }) => {
   const [l1, l2, l3] = level
     ? [level + "_rca1", level + "_rca2", level + "_rca3"]
     : ["rca1", "rca2", "rca3"]
@@ -41,11 +41,13 @@ const RCAFormBlock = ({ form, rca, label, level }) => {
                 form.get(l2) &&
                 rca.rca3[form.get(l2)] &&
                 [
-                  rca.rca3[form.get(l2)][form.get("allocation_vertical")], //specific rc3
-                  rca.rca3[form.get(l2)][""], //horizontal rc3
-                ]
-                  .flat() //flattening both arrays
-                  .filter((e) => e) //making sure no undefined remains
+                  ...new Set(
+                    [
+                      rca.rca3[form.get(l2)][vertical], //specific rc3
+                      rca.rca3[form.get(l2)][""], //horizontal rc3
+                    ].flat()
+                  ),
+                ].filter((e) => e) //making sure no undefined remains
               }
             ></FormDropdown>
           </div>
