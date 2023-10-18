@@ -23,12 +23,13 @@ export default function Home() {
 
   const sheets = useSheets()
 
-  const filter_handler = (type, reviewer) => {
-    if (type === "reviewer")
+  const filter_handler = (field, reviewer) => {
+    if (field === "reviewer")
       dispatch({ type: "filter_reviewer", payload: { reviewer } })
-    else if (type === "quality_reviewer") {
+    else if (field === "quality_reviewer")
       dispatch({ type: "filter_quality_reviewer", payload: { reviewer } })
-    }
+    else if (field === "final_reviewer")
+      dispatch({ type: "filter_final_reviewer", payload: { reviewer } })
   }
 
   const select_handler = (ticket_id) => {
@@ -83,7 +84,7 @@ export default function Home() {
       <div
         className="columns section px-5 pt-4 pb-2"
         style={{
-          maxHeight: "100vh",
+          height: "100vh",
           overflowY: "hidden",
         }}
       >
@@ -100,20 +101,28 @@ export default function Home() {
           </div>
           <br></br>
           {state.updated.data && (
-            <ReviewerList
-              label={"Reviewer Selection"}
-              filter_handler={filter_handler}
-              field={"reviewer"}
-              data={state.updated.data}
-            />
-          )}
-          {state.updated.data && (
-            <ReviewerList
-              label={"QC Reviewer Selection"}
-              filter_handler={filter_handler}
-              field={"quality_reviewer"}
-              data={state.updated.data}
-            />
+            <>
+              <ReviewerList
+                label={"Reviewer Selection"}
+                filter_handler={filter_handler}
+                field={"reviewer"}
+                data={state.updated.data}
+              />
+
+              <ReviewerList
+                label={"Final Reviewer Selection"}
+                filter_handler={filter_handler}
+                field={"final_reviewer"}
+                data={state.updated.data}
+              />
+
+              <ReviewerList
+                label={"QC Reviewer Selection"}
+                filter_handler={filter_handler}
+                field={"quality_reviewer"}
+                data={state.updated.data}
+              />
+            </>
           )}
           <br></br>
           {state.updated.data && (
@@ -203,6 +212,7 @@ export default function Home() {
                     false_text={"NO"}
                   />
                 </div>
+
                 <div className="column is-6">
                   <AreaInput
                     label={"Reviewer Comment"}
@@ -215,6 +225,22 @@ export default function Home() {
                     label={"Quality Check Comment"}
                     form={form}
                     field={"quality_check"}
+                  />
+                </div>
+                <div className="column is-6">
+                  <TextInput
+                    label={"Final Reviewer"}
+                    form={form}
+                    field={"final_reviewer"}
+                    placeholder={form.get("reviewer")}
+                  />
+                </div>
+                <div className="column is-6">
+                  <TextInput
+                    label={"Final Quality Reviewer"}
+                    form={form}
+                    field={"final_quality_reviewer"}
+                    placeholder={form.get("quality_reviewer")}
                   />
                 </div>
                 <div className="column is-6">
@@ -290,6 +316,17 @@ const reducer = (state, action) => {
         filter: {
           ...state.filter,
           quality_reviewer:
+            action.payload.reviewer === "All Reviewers"
+              ? ""
+              : action.payload.reviewer,
+        },
+      }
+    case "filter_final_reviewer":
+      return {
+        ...state,
+        filter: {
+          ...state.filter,
+          final_reviewer:
             action.payload.reviewer === "All Reviewers"
               ? ""
               : action.payload.reviewer,
@@ -777,6 +814,7 @@ const initialState = {
   filter: {
     reviewer: null,
     quality_reviewer: null,
+    final_reviewer: null,
   },
 }
 
@@ -914,6 +952,8 @@ const form_fields = [
     default: false,
     required: true,
   },
+  { name: "final_reviewer", default: "", required: false },
+  { name: "final_quality_reviewer", default: "", required: false },
 ]
 
 //---------------------------------------------------------- Selected Columns

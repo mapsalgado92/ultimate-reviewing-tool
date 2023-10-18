@@ -14,7 +14,10 @@ const ReviewSelector = ({ data, filter, selected, select_handler }) => {
             let quality_filter = filter.quality_reviewer
               ? filter.quality_reviewer === r.quality_reviewer
               : true
-            return reviewer_filter && quality_filter
+            let final_reviewer = filter.final_reviewer
+              ? filter.final_reviewer === r.final_reviewer
+              : true
+            return reviewer_filter && quality_filter && final_reviewer
           })
           .sort((a, b) => (a.rated_date > b.rated_date ? 1 : -1))
           .map((record) => (
