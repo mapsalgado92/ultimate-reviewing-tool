@@ -6,7 +6,7 @@ const ReviewerList = ({ label, filter_handler, field, data }) => {
   return (
     <>
       <div className="field">
-        <label className="label">{label}</label>
+        <label className="label is-size-7">{label}</label>
         <div className="control select is-small is-fullwidth">
           <select
             onChange={(e) => {

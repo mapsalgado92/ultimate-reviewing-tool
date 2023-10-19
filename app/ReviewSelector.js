@@ -22,7 +22,7 @@ const ReviewSelector = ({ data, filter, selected, select_handler }) => {
           .sort((a, b) => (a.rated_date > b.rated_date ? 1 : -1))
           .map((record) => (
             <li
-              className={`button is-fullwidth is-small  ${
+              className={`button is-fullwidth is-small is-radiusless  ${
                 record.reviewed ? "is-success" : "is-danger"
               } ${
                 selected

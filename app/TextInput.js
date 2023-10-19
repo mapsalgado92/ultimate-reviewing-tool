@@ -3,7 +3,7 @@ const TextInput = ({ label, form, field, placeholder }) => {
     <>
       <label className="label">{label}</label>
       <input
-        className={`input is-size-6 `}
+        className={`input is-size-7`}
         value={form.get(field)}
         placeholder={placeholder || "..."}
         onChange={(e) => {

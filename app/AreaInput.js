@@ -3,7 +3,7 @@ const AreaInput = ({ label, form, field }) => {
     <>
       <label className="label">{label}</label>
       <textarea
-        className="textarea is-size-6"
+        className="textarea is-size-7"
         value={form.get(field)}
         onChange={(e) => {
           form.set(field, e.target.value)

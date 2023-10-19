@@ -18,8 +18,11 @@ export default function Home() {
   const [state, dispatch] = useReducer(reducer, initialState)
   const form = useForm({ fields: form_fields })
 
+  //SEARCH PARAMS
   const searchParams = useSearchParams()
-  const lob = searchParams.get("lob")
+  const lob = searchParams.get("lob") || "retail"
+  const days = searchParams.get("days") || 7
+  /////
 
   const sheets = useSheets()
 
@@ -54,12 +57,16 @@ export default function Home() {
   }
 
   const pull_handler = async () => {
+    const limit_date = new Date(new Date() - days * 24 * 3600 * 1000)
+      .toISOString()
+      .split("T")[0]
+
     const pull_origin = objectify(
       await sheets.pull_data(`reviews-pull-${lob.toLowerCase()}`)
-    )
-    const updated = objectify(
-      await sheets.pull_data("reviews-updated")
-    ).reverse()
+    ).filter((o) => o.rated_date > limit_date)
+    const updated = objectify(await sheets.pull_data("reviews-updated"))
+      .reverse()
+      .filter((u) => u.rated_date > limit_date)
 
     const rca = (await sheets.pull_rca(`rca-${lob.toLowerCase()}-json`))[0]
 
@@ -79,24 +86,22 @@ export default function Home() {
     })
   }
 
+  //----------------------------------------------------------> JSX
+
   return (
     <main>
       <div
-        className="columns section px-5 pt-4 pb-2"
+        className="columns section px-5 pt-4 pb-2 m-0"
         style={{
           height: "100vh",
           overflowY: "hidden",
         }}
       >
-        <div
-          className="column is-3 mb-0 card"
-          style={{
-            maxHeight: "100%",
-            overflowY: "auto",
-          }}
-        >
-          <br></br>
-          <div className="button is-fullwidth" onClick={() => pull_handler()}>
+        <div className="column is-3 is-flex is-flex-direction-column mb-0 card is-fullheight">
+          <div
+            className="button is-danger is-light is-fullwidth"
+            onClick={() => pull_handler()}
+          >
             PULL {lob.toUpperCase()} DATA
           </div>
           <br></br>
@@ -124,16 +129,26 @@ export default function Home() {
               />
             </>
           )}
-          <br></br>
           {state.updated.data && (
-            <ReviewSelector
-              data={state.updated.data}
-              filter={state.filter}
-              selected={state.selected}
-              select_handler={select_handler}
-            />
+            <>
+              <div className="tag py-4 is-fullwidth is-dark is-radiusless">
+                Reviews List
+              </div>
+              <div
+                className="is-align-self-stretch"
+                style={{ overflowY: "auto" }}
+              >
+                <ReviewSelector
+                  data={state.updated.data}
+                  filter={state.filter}
+                  selected={state.selected}
+                  select_handler={select_handler}
+                />
+              </div>
+            </>
           )}
         </div>
+
         {state.selected && (
           <div
             className="column is-9 has-text-centered"
@@ -264,7 +279,7 @@ export default function Home() {
               </div>
               <BoxGrid columns={bottom_columns} selected={state.selected} />
               <button
-                className="button is-small is-primary is-size-6 is-fullwidth"
+                className="button is-large is-success is-size-6"
                 onClick={() => save_handler()}
                 type="button"
               >
@@ -278,7 +293,7 @@ export default function Home() {
   )
 }
 
-//----------------------------------------------------------- Reducer & Initial State
+//-----------------------------------------------------------> Reducer & Initial State
 const reducer = (state, action) => {
   switch (action.type) {
     case "pull":
