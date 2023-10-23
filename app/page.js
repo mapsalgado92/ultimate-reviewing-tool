@@ -64,9 +64,10 @@ export default function Home() {
     const pull_origin = objectify(
       await sheets.pull_data(`reviews-pull-${lob.toLowerCase()}`)
     ).filter((o) => o.rated_date > limit_date)
-    const updated = objectify(await sheets.pull_data("reviews-updated"))
-      .reverse()
-      .filter((u) => u.rated_date > limit_date)
+    const updated = objectify(
+      await sheets.pull_data("reviews-updated")
+    ).reverse()
+    //.filter((u) => u.rated_date > limit_date)
 
     const rca = (await sheets.pull_rca(`rca-${lob.toLowerCase()}-json`))[0]
 
