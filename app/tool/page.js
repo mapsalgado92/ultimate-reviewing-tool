@@ -25,7 +25,7 @@ export default function Tool() {
   //SEARCH PARAMS
   const searchParams = useSearchParams()
   const lob = searchParams.get("lob") || "retail"
-  const days = searchParams.get("days") || 7
+  const days = searchParams.get("days") || 60
   /////
 
   const sheets = useSheets()
